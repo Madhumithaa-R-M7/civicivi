@@ -1100,7 +1100,7 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
                 // GPS Information & Verification Card
                 _buildGpsCard(),
 
-                const SizedBox(height: 20),
+                const SizedBox(height: 36),
               ],
             ),
           ),
@@ -1128,7 +1128,7 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
     );
   }
 
-  /// Comprehensive GPS Card with coordinates, accuracy in meters, timestamp, and actions
+  /// Comprehensive, responsive GPS Card for small Android screens
   Widget _buildGpsCard() {
     if (_isFetchingLocation) {
       return Container(
@@ -1151,9 +1151,11 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
               child: CircularProgressIndicator(strokeWidth: 2.5, color: Color(0xFF2962FF)),
             ),
             SizedBox(width: 14),
-            Text(
-              "Acquiring high-accuracy GPS coordinates...",
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF1A237E)),
+            Flexible(
+              child: Text(
+                "Acquiring high-accuracy GPS coordinates...",
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF1A237E)),
+              ),
             ),
           ],
         ),
@@ -1176,13 +1178,15 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
               children: [
                 const Icon(Icons.location_off_rounded, color: Colors.red, size: 22),
                 const SizedBox(width: 8),
-                const Text(
-                  "Location Not Available",
-                  style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 14),
+                const Expanded(
+                  child: Text(
+                    "Location Not Available",
+                    style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 14),
+                  ),
                 ),
-                const Spacer(),
                 TextButton(
                   onPressed: _showManualLocationDialog,
+                  style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
                   child: const Text("Enter Manually", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                 ),
               ],
@@ -1216,8 +1220,8 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
     if (_latitude != null && _longitude != null) {
       final isPoorAccuracy = _locationAccuracy != null && _locationAccuracy! > 50.0;
       final captureTimeStr = _locationCapturedAt != null
-          ? "${_locationCapturedAt!.hour.toString().padLeft(2, '0')}:${_locationCapturedAt!.minute.toString().padLeft(2, '0')}:${_locationCapturedAt!.second.toString().padLeft(2, '0')}, ${_locationCapturedAt!.day}/${_locationCapturedAt!.month}/${_locationCapturedAt!.year}"
-          : "Just now";
+          ? "${_locationCapturedAt!.hour.toString().padLeft(2, '0')}:${_locationCapturedAt!.minute.toString().padLeft(2, '0')}:${_locationCapturedAt!.second.toString().padLeft(2, '0')}, ${_locationCapturedAt!.day.toString().padLeft(2, '0')}/${_locationCapturedAt!.month.toString().padLeft(2, '0')}/${_locationCapturedAt!.year}"
+          : "Captured just now";
 
       return Container(
         width: double.infinity,
@@ -1226,13 +1230,13 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
           color: Colors.white,
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
-            color: _isLocationManual ? Colors.orange.shade200 : Colors.green.shade200,
+            color: _isLocationManual ? Colors.orange.shade300 : const Color(0xFF2962FF).withAlpha(60),
             width: 1.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: (_isLocationManual ? Colors.orange : Colors.green).withAlpha(18),
-              blurRadius: 12,
+              color: (_isLocationManual ? Colors.orange : const Color(0xFF2962FF)).withAlpha(15),
+              blurRadius: 14,
               offset: const Offset(0, 4),
             )
           ],
@@ -1240,97 +1244,175 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Header: Title + Verification Badge
             Row(
               children: [
                 Icon(
                   _isLocationManual ? Icons.edit_location_alt_rounded : Icons.gps_fixed_rounded,
-                  color: _isLocationManual ? Colors.orange : Colors.green.shade700,
+                  color: _isLocationManual ? Colors.orange.shade800 : const Color(0xFF2962FF),
                   size: 20,
                 ),
                 const SizedBox(width: 8),
-                Text(
-                  _isLocationManual ? "Manual Location Selected" : "GPS Location Captured",
-                  style: TextStyle(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 14,
-                    color: _isLocationManual ? Colors.orange.shade900 : const Color(0xFF1A237E),
+                Expanded(
+                  child: Text(
+                    _isLocationManual ? "Manual Location Selected" : "GPS Location Captured",
+                    style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 14,
+                      color: _isLocationManual ? Colors.orange.shade900 : const Color(0xFF1A237E),
+                    ),
                   ),
                 ),
-                const Spacer(),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: (_isLocationManual ? Colors.orange : Colors.green).withAlpha(20),
                     borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    _isLocationManual ? "MANUAL" : "GPS VERIFIED",
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      color: _isLocationManual ? Colors.orange.shade800 : Colors.green.shade800,
+                    border: Border.all(
+                      color: (_isLocationManual ? Colors.orange : Colors.green).withAlpha(80),
+                      width: 1,
                     ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        _isLocationManual ? Icons.handyman_rounded : Icons.verified_rounded,
+                        size: 11,
+                        color: _isLocationManual ? Colors.orange.shade800 : Colors.green.shade800,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        _isLocationManual ? "MANUAL" : "GPS VERIFIED",
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.5,
+                          color: _isLocationManual ? Colors.orange.shade800 : Colors.green.shade800,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
 
-            // Exact Coordinates Display
+            // Exact Coordinates Display (Separate lines, clear labels, no overlap)
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               decoration: BoxDecoration(
                 color: const Color(0xFFF8FAFC),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(14),
                 border: Border.all(color: Colors.grey.shade200),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Line 1: Latitude
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        "Latitude: ${_latitude!.toStringAsFixed(6)}",
-                        style: const TextStyle(
-                          fontFamily: 'monospace',
-                          fontWeight: FontWeight.w700,
-                          fontSize: 13,
-                          color: Color(0xFF1E293B),
-                        ),
+                      const Icon(Icons.explore_outlined, size: 15, color: Color(0xFF2962FF)),
+                      const SizedBox(width: 8),
+                      const Text(
+                        "Latitude:",
+                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: Color(0xFF64748B)),
                       ),
-                      Text(
-                        "Longitude: ${_longitude!.toStringAsFixed(6)}",
-                        style: const TextStyle(
-                          fontFamily: 'monospace',
-                          fontWeight: FontWeight.w700,
-                          fontSize: 13,
-                          color: Color(0xFF1E293B),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          "${_latitude!.toStringAsFixed(6)}°",
+                          style: const TextStyle(
+                            fontFamily: 'monospace',
+                            fontWeight: FontWeight.w700,
+                            fontSize: 13,
+                            color: Color(0xFF1E293B),
+                          ),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 8),
+
+                  // Line 2: Longitude
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      if (_locationAccuracy != null)
-                        Text(
-                          "Accuracy: ±${_locationAccuracy!.toStringAsFixed(1)} m",
+                      const Icon(Icons.explore_outlined, size: 15, color: Color(0xFF2962FF)),
+                      const SizedBox(width: 8),
+                      const Text(
+                        "Longitude:",
+                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: Color(0xFF64748B)),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          "${_longitude!.toStringAsFixed(6)}°",
+                          style: const TextStyle(
+                            fontFamily: 'monospace',
+                            fontWeight: FontWeight.w700,
+                            fontSize: 13,
+                            color: Color(0xFF1E293B),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8),
+                    child: Divider(height: 1, thickness: 1, color: Color(0xFFE2E8F0)),
+                  ),
+
+                  // Line 3: Accuracy in meters
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.track_changes_rounded,
+                        size: 15,
+                        color: isPoorAccuracy ? Colors.orange.shade800 : Colors.green.shade700,
+                      ),
+                      const SizedBox(width: 8),
+                      const Text(
+                        "Accuracy:",
+                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: Color(0xFF64748B)),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _locationAccuracy != null
+                              ? "±${_locationAccuracy!.toStringAsFixed(1)} meters"
+                              : "Standard GPS (~10 m)",
                           style: TextStyle(
                             fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: isPoorAccuracy ? Colors.orange.shade800 : Colors.green.shade800,
+                            fontWeight: FontWeight.w700,
+                            color: isPoorAccuracy ? Colors.orange.shade900 : Colors.green.shade800,
                           ),
-                        )
-                      else
-                        const Text(
-                          "Accuracy: Not Available",
-                          style: TextStyle(fontSize: 12, color: Colors.grey),
                         ),
-                      Text(
-                        captureTimeStr,
-                        style: const TextStyle(fontSize: 11, color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+
+                  // Line 4: Capture timestamp (full date and time, no clipping)
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(Icons.schedule_rounded, size: 15, color: Color(0xFF64748B)),
+                      const SizedBox(width: 8),
+                      const Text(
+                        "Captured At:",
+                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: Color(0xFF64748B)),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          captureTimeStr,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF1E293B),
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -1339,40 +1421,71 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
             ),
 
             if (isPoorAccuracy) ...[
-              const SizedBox(height: 6),
-              Row(
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.orange.shade50,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.orange.shade200),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.info_outline_rounded, size: 16, color: Colors.orange),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        "GPS accuracy is low (±${_locationAccuracy!.toStringAsFixed(0)}m). For highest precision, step under open sky and tap Refresh.",
+                        style: TextStyle(fontSize: 11, color: Colors.orange.shade900),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+
+            const SizedBox(height: 12),
+
+            // Resolved Location Address (full text wrapping, no maxLines truncation)
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF1F5F9),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.info_outline_rounded, size: 14, color: Colors.orange),
-                  const SizedBox(width: 4),
+                  const Icon(Icons.place_rounded, size: 18, color: Color(0xFF2962FF)),
+                  const SizedBox(width: 8),
                   Expanded(
-                    child: Text(
-                      "GPS accuracy is low (±${_locationAccuracy!.toStringAsFixed(0)}m). For better precision, step into an open area and tap Refresh.",
-                      style: TextStyle(fontSize: 11, color: Colors.orange.shade900),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "RESOLVED ADDRESS",
+                          style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF64748B)),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          _currentAddress,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: Color(0xFF1E293B),
+                            height: 1.35,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
-            ],
-
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                const Icon(Icons.place_outlined, size: 16, color: Colors.grey),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Text(
-                    _currentAddress,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
-                  ),
-                ),
-              ],
             ),
 
-            const SizedBox(height: 12),
+            const SizedBox(height: 14),
 
-            // Actions: Use This Location, Retake / Refresh, Map Preview
+            // Action Buttons: Location Confirmed, View on Map, Refresh GPS
             Wrap(
               spacing: 8,
               runSpacing: 8,
@@ -1381,16 +1494,22 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
                   onPressed: () {
                     setState(() => _isLocationConfirmed = true);
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Location confirmed! You can proceed to next step.")),
+                      const SnackBar(
+                        content: Text("Location confirmed! Tap Continue to proceed."),
+                        backgroundColor: Color(0xFF2962FF),
+                      ),
                     );
                   },
-                  icon: const Icon(Icons.check_circle_outline_rounded, size: 16),
-                  label: Text(_isLocationConfirmed ? "Location Confirmed" : "Use This Location"),
+                  icon: Icon(
+                    _isLocationConfirmed ? Icons.check_circle_rounded : Icons.check_circle_outline_rounded,
+                    size: 16,
+                  ),
+                  label: Text(_isLocationConfirmed ? "Location Confirmed" : "Confirm Location"),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _isLocationConfirmed ? Colors.green : const Color(0xFF2962FF),
+                    backgroundColor: _isLocationConfirmed ? Colors.green.shade700 : const Color(0xFF2962FF),
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   ),
                 ),
                 OutlinedButton.icon(
@@ -1401,7 +1520,7 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
                     foregroundColor: const Color(0xFF2962FF),
                     side: const BorderSide(color: Color(0xFF2962FF)),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   ),
                 ),
                 OutlinedButton.icon(
@@ -1409,10 +1528,10 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
                   icon: const Icon(Icons.refresh_rounded, size: 16),
                   label: const Text("Refresh GPS"),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.grey.shade700,
+                    foregroundColor: Colors.grey.shade800,
                     side: BorderSide(color: Colors.grey.shade300),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   ),
                 ),
               ],
@@ -1583,8 +1702,12 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
   // --- STEP 4: REVIEW & SUBMISSION ---
   Widget _buildStep4() {
     final captureTimeStr = _locationCapturedAt != null
-        ? "${_locationCapturedAt!.hour.toString().padLeft(2, '0')}:${_locationCapturedAt!.minute.toString().padLeft(2, '0')}:${_locationCapturedAt!.second.toString().padLeft(2, '0')}, ${_locationCapturedAt!.day}/${_locationCapturedAt!.month}/${_locationCapturedAt!.year}"
-        : "Recorded with submission";
+        ? "${_locationCapturedAt!.hour.toString().padLeft(2, '0')}:${_locationCapturedAt!.minute.toString().padLeft(2, '0')}:${_locationCapturedAt!.second.toString().padLeft(2, '0')}, ${_locationCapturedAt!.day.toString().padLeft(2, '0')}/${_locationCapturedAt!.month.toString().padLeft(2, '0')}/${_locationCapturedAt!.year}"
+        : "Captured with submission";
+
+    Color priorityColor = Colors.orange;
+    if (_selectedPriority == "High Priority") priorityColor = Colors.red;
+    if (_selectedPriority == "Low Priority") priorityColor = Colors.blue;
 
     return Column(
       children: [
@@ -1595,60 +1718,448 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                const SizedBox(height: 8),
                 const Text(
                   "Review & Submit",
                   style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: Color(0xFF1A237E)),
                 ),
+                const SizedBox(height: 4),
+                const Text(
+                  "Please verify all details of your report before submitting to municipal authorities.",
+                  style: TextStyle(color: Colors.grey, fontSize: 13),
+                ),
                 const SizedBox(height: 16),
+
+                // Card 1: Captured Photo Evidence Preview with Retake Action
                 Container(
-                  padding: const EdgeInsets.all(18),
+                  width: double.infinity,
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(20),
-                    boxShadow: [BoxShadow(color: Colors.black.withAlpha(8), blurRadius: 16)],
+                    boxShadow: [
+                      BoxShadow(color: const Color(0xFF2962FF).withAlpha(15), blurRadius: 14, offset: const Offset(0, 4))
+                    ],
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       ClipRRect(
-                        borderRadius: BorderRadius.circular(14),
-                        child: _selectedImage != null
-                            ? Image.file(_selectedImage!, height: 180, width: double.infinity, fit: BoxFit.cover)
-                            : Container(
-                                height: 180,
-                                width: double.infinity,
-                                color: const Color(0xFFF1F5F9),
-                                child: const Icon(Icons.image_not_supported_rounded, size: 48, color: Colors.grey),
+                        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                        child: Stack(
+                          children: [
+                            _selectedImage != null
+                                ? Image.file(_selectedImage!, height: 200, width: double.infinity, fit: BoxFit.cover)
+                                : Container(
+                                    height: 180,
+                                    width: double.infinity,
+                                    color: const Color(0xFFF1F5F9),
+                                    child: const Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.image_not_supported_rounded, size: 48, color: Colors.grey),
+                                        SizedBox(height: 8),
+                                        Text("No photo attached", style: TextStyle(color: Colors.grey)),
+                                      ],
+                                    ),
+                                  ),
+                            Positioned(
+                              top: 12,
+                              right: 12,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withAlpha(160),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: const Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.verified_rounded, size: 14, color: Colors.greenAccent),
+                                    SizedBox(width: 4),
+                                    Text(
+                                      "Photo Evidence",
+                                      style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                                    ),
+                                  ],
+                                ),
                               ),
-                      ),
-                      const SizedBox(height: 16),
-                      _buildReviewRow("LOCATION ADDRESS", _currentAddress, Icons.location_on_rounded),
-                      if (_latitude != null && _longitude != null)
-                        _buildReviewRow(
-                          "GPS COORDINATES",
-                          "Lat: ${_latitude!.toStringAsFixed(6)}, Lng: ${_longitude!.toStringAsFixed(6)}",
-                          Icons.gps_fixed_rounded,
+                            ),
+                          ],
                         ),
-                      if (_locationAccuracy != null)
-                        _buildReviewRow(
-                          "LOCATION ACCURACY",
-                          "±${_locationAccuracy!.toStringAsFixed(1)} meters",
-                          Icons.track_changes_rounded,
-                        ),
-                      _buildReviewRow(
-                        "CAPTURE TIMESTAMP",
-                        captureTimeStr,
-                        Icons.access_time_rounded,
                       ),
-                      _buildReviewRow("CATEGORY", _selectedCategory ?? "General", Icons.grid_view_rounded),
-                      _buildReviewRow("PRIORITY", _selectedPriority ?? "Medium Priority", Icons.flag_rounded),
-                      _buildReviewRow("DESCRIPTION", _descriptionController.text.trim(), Icons.notes_rounded),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              "Camera Photo Proof",
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF1A237E)),
+                            ),
+                            TextButton.icon(
+                              onPressed: _pickImageFromCamera,
+                              icon: const Icon(Icons.camera_alt_outlined, size: 16),
+                              label: const Text("Retake Photo", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                              style: TextButton.styleFrom(
+                                foregroundColor: const Color(0xFF2962FF),
+                                visualDensity: VisualDensity.compact,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 14),
 
-                // Transparency Notice
+                // Card 2: Location & GPS Proof Details
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(
+                      color: _isLocationManual ? Colors.orange.shade200 : const Color(0xFF2962FF).withAlpha(40),
+                      width: 1.5,
+                    ),
+                    boxShadow: [
+                      BoxShadow(color: Colors.black.withAlpha(6), blurRadius: 10, offset: const Offset(0, 3))
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            _isLocationManual ? Icons.edit_location_alt_rounded : Icons.gps_fixed_rounded,
+                            color: _isLocationManual ? Colors.orange.shade800 : const Color(0xFF2962FF),
+                            size: 18,
+                          ),
+                          const SizedBox(width: 8),
+                          const Text(
+                            "LOCATION & GPS PROOF",
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 0.8,
+                              color: Color(0xFF1A237E),
+                            ),
+                          ),
+                          const Spacer(),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: (_isLocationManual ? Colors.orange : Colors.green).withAlpha(20),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              _isLocationManual ? "MANUAL ENTRY" : "GPS VERIFIED",
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: _isLocationManual ? Colors.orange.shade800 : Colors.green.shade800,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+
+                      // Address with full wrapping
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(Icons.place_rounded, size: 16, color: Color(0xFF2962FF)),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  "Resolved Address",
+                                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  _currentAddress,
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0xFF1A237E),
+                                    height: 1.35,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8),
+                        child: Divider(height: 1, thickness: 1, color: Color(0xFFF1F5F9)),
+                      ),
+
+                      // Coordinates Display (Separate lines, clear labels)
+                      if (_latitude != null && _longitude != null) ...[
+                        Row(
+                          children: [
+                            const Icon(Icons.explore_outlined, size: 15, color: Color(0xFF2962FF)),
+                            const SizedBox(width: 8),
+                            const Text(
+                              "Latitude: ",
+                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF64748B)),
+                            ),
+                            Expanded(
+                              child: Text(
+                                "${_latitude!.toStringAsFixed(6)}°",
+                                style: const TextStyle(
+                                  fontFamily: 'monospace',
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF1E293B),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            const Icon(Icons.explore_outlined, size: 15, color: Color(0xFF2962FF)),
+                            const SizedBox(width: 8),
+                            const Text(
+                              "Longitude: ",
+                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF64748B)),
+                            ),
+                            Expanded(
+                              child: Text(
+                                "${_longitude!.toStringAsFixed(6)}°",
+                                style: const TextStyle(
+                                  fontFamily: 'monospace',
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF1E293B),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                      ],
+
+                      // Accuracy & Timestamp
+                      Row(
+                        children: [
+                          const Icon(Icons.track_changes_rounded, size: 15, color: Colors.green),
+                          const SizedBox(width: 8),
+                          const Text(
+                            "Accuracy: ",
+                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF64748B)),
+                          ),
+                          Expanded(
+                            child: Text(
+                              _locationAccuracy != null
+                                  ? "±${_locationAccuracy!.toStringAsFixed(1)} meters"
+                                  : "Standard GPS",
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF1E293B),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(Icons.access_time_rounded, size: 15, color: Color(0xFF64748B)),
+                          const SizedBox(width: 8),
+                          const Text(
+                            "Timestamp: ",
+                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF64748B)),
+                          ),
+                          Expanded(
+                            child: Text(
+                              captureTimeStr,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF1E293B),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14),
+
+                // Card 3: Issue Categorization & Priority
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: Colors.grey.shade200),
+                    boxShadow: [
+                      BoxShadow(color: Colors.black.withAlpha(6), blurRadius: 10, offset: const Offset(0, 3))
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Row(
+                        children: [
+                          Icon(Icons.category_rounded, size: 18, color: Color(0xFF2962FF)),
+                          SizedBox(width: 8),
+                          Text(
+                            "ISSUE CLASSIFICATION",
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 0.8,
+                              color: Color(0xFF1A237E),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF2962FF).withAlpha(15),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Icon(Icons.grid_view_rounded, size: 20, color: Color(0xFF2962FF)),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  "Category",
+                                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey),
+                                ),
+                                Text(
+                                  _selectedCategory ?? "General Civic Issue",
+                                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF1A237E)),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: priorityColor.withAlpha(20),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Icon(Icons.flag_rounded, size: 20, color: priorityColor),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  "Priority Level",
+                                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey),
+                                ),
+                                Text(
+                                  _selectedPriority ?? "Medium Priority",
+                                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: priorityColor),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14),
+
+                // Card 4: Detailed Description with Full Word Wrapping
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: Colors.grey.shade200),
+                    boxShadow: [
+                      BoxShadow(color: Colors.black.withAlpha(6), blurRadius: 10, offset: const Offset(0, 3))
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Row(
+                            children: [
+                              Icon(Icons.notes_rounded, size: 18, color: Color(0xFF2962FF)),
+                              SizedBox(width: 8),
+                              Text(
+                                "PROBLEM DESCRIPTION",
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 0.8,
+                                  color: Color(0xFF1A237E),
+                                ),
+                              ),
+                            ],
+                          ),
+                          TextButton(
+                            onPressed: () => setState(() => _currentStep = 3),
+                            style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
+                            child: const Text("Edit", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF8FAFC),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                        ),
+                        child: Text(
+                          _descriptionController.text.trim().isNotEmpty
+                              ? _descriptionController.text.trim()
+                              : "No description provided.",
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: Color(0xFF334155),
+                            height: 1.45,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14),
+
+                // Card 5: Transparency & Audit Notice
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
@@ -1657,29 +2168,34 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
                   ),
                   child: const Row(
                     children: [
-                      Icon(Icons.info_outline_rounded, color: Colors.blueGrey, size: 20),
+                      Icon(Icons.security_rounded, color: Color(0xFF2962FF), size: 18),
                       SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          "Note: GPS coordinates record device location at the time of photo capture to assist repair crews.",
-                          style: TextStyle(fontSize: 11, color: Colors.blueGrey),
+                          "GPS coordinates and photographic evidence are cryptographically hashed and stored in PostgreSQL to ensure transparency.",
+                          style: TextStyle(fontSize: 11, color: Color(0xFF475569)),
                         ),
                       ),
                     ],
                   ),
                 ),
+                const SizedBox(height: 12),
 
-                const SizedBox(height: 14),
+                // Confirmation Checkbox
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14)),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: _isConfirmed ? const Color(0xFF2962FF).withAlpha(80) : Colors.grey.shade200),
+                  ),
                   child: Row(
                     children: [
                       Checkbox(
                         value: _isConfirmed,
                         activeColor: const Color(0xFF2962FF),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-                        onChanged: (val) => setState(() => _isConfirmed = val ?? false),
+                        onChanged: _isSubmitting ? null : (val) => setState(() => _isConfirmed = val ?? false),
                       ),
                       const Expanded(
                         child: Text(
@@ -1690,49 +2206,64 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
                     ],
                   ),
                 ),
+
+                const SizedBox(height: 36),
               ],
             ),
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.all(20),
-          child: Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: _isSubmitting ? null : () => setState(() => _currentStep = 3),
-                  style: OutlinedButton.styleFrom(
-                    minimumSize: const Size(0, 54),
-                    side: const BorderSide(color: Color(0xFF2962FF)),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+
+        // Bottom Submission Controls (SafeArea protected, accessible)
+        SafeArea(
+          top: false,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(color: Colors.black.withAlpha(8), blurRadius: 10, offset: const Offset(0, -4))
+              ],
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 1,
+                  child: OutlinedButton(
+                    onPressed: _isSubmitting ? null : () => setState(() => _currentStep = 3),
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size(0, 52),
+                      side: const BorderSide(color: Color(0xFF2962FF)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    ),
+                    child: const Text("Back / Edit", style: TextStyle(fontWeight: FontWeight.bold)),
                   ),
-                  child: const Text("Back", style: TextStyle(fontWeight: FontWeight.bold)),
                 ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: (_isConfirmed && !_isSubmitting) ? _submitReport : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2962FF),
-                    disabledBackgroundColor: Colors.grey.shade300,
-                    minimumSize: const Size(0, 54),
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                const SizedBox(width: 12),
+                Expanded(
+                  flex: 2,
+                  child: ElevatedButton(
+                    onPressed: (_isConfirmed && !_isSubmitting) ? _submitReport : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF2962FF),
+                      disabledBackgroundColor: Colors.grey.shade300,
+                      minimumSize: const Size(0, 52),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    ),
+                    child: _isSubmitting
+                        ? const SizedBox(
+                            height: 22,
+                            width: 22,
+                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+                          )
+                        : const Text(
+                            "Submit Complaint",
+                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
+                          ),
                   ),
-                  child: _isSubmitting
-                      ? const SizedBox(
-                          height: 22,
-                          width: 22,
-                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
-                        )
-                      : const Text(
-                          "Submit Complaint",
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
-                        ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ],
@@ -1750,28 +2281,6 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
     );
   }
 
-  Widget _buildReviewRow(String label, String value, IconData icon) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, size: 16, color: const Color(0xFF2962FF)),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(label, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey)),
-                const SizedBox(height: 2),
-                Text(value, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF1A237E))),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildCategoryTile(Map<String, dynamic> cat) {
     final bool isSelected = _selectedCategory == cat['title'];
@@ -1996,43 +2505,52 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
   }
 
   Widget _buildNavigationButtons({required VoidCallback onNext, required bool enabled, bool showBack = true}) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [BoxShadow(color: Colors.black.withAlpha(8), blurRadius: 10, offset: const Offset(0, -4))],
-      ),
-      child: Row(
-        children: [
-          if (showBack) ...[
-            Expanded(
-              child: OutlinedButton(
-                onPressed: () => setState(() => _currentStep--),
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size(0, 52),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                  side: const BorderSide(color: Color(0xFF2962FF)),
-                ),
-                child: const Text("Back", style: TextStyle(fontWeight: FontWeight.bold)),
-              ),
-            ),
-            const SizedBox(width: 14),
+    return SafeArea(
+      top: false,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withAlpha(8),
+              blurRadius: 10,
+              offset: const Offset(0, -4),
+            )
           ],
-          Expanded(
-            flex: showBack ? 1 : 2,
-            child: ElevatedButton(
-              onPressed: enabled ? onNext : null,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2962FF),
-                disabledBackgroundColor: Colors.grey.shade300,
-                minimumSize: const Size(0, 52),
-                elevation: 0,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        ),
+        child: Row(
+          children: [
+            if (showBack) ...[
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () => setState(() => _currentStep--),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size(0, 52),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    side: const BorderSide(color: Color(0xFF2962FF)),
+                  ),
+                  child: const Text("Back", style: TextStyle(fontWeight: FontWeight.bold)),
+                ),
               ),
-              child: const Text("Continue", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
+              const SizedBox(width: 14),
+            ],
+            Expanded(
+              flex: showBack ? 1 : 2,
+              child: ElevatedButton(
+                onPressed: enabled ? onNext : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2962FF),
+                  disabledBackgroundColor: Colors.grey.shade300,
+                  minimumSize: const Size(0, 52),
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+                child: const Text("Continue", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

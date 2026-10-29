@@ -3,9 +3,24 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
+  /// Resolve proper image MediaType from filename extension for multipart uploads
+  static MediaType _resolveImageMediaType(String filePath) {
+    final ext = filePath.split('.').last.toLowerCase();
+    switch (ext) {
+      case 'png':
+        return MediaType('image', 'png');
+      case 'webp':
+        return MediaType('image', 'webp');
+      case 'jpg':
+      case 'jpeg':
+      default:
+        return MediaType('image', 'jpeg');
+    }
+  }
   // Encrypted secure storage for sensitive JWT authentication tokens
   static const _secureStorage = FlutterSecureStorage(
     aOptions: AndroidOptions(encryptedSharedPreferences: true),
@@ -462,11 +477,17 @@ class ApiService {
       if (imageFile != null && await imageFile.exists()) {
         final stream = http.ByteStream(imageFile.openRead());
         final length = await imageFile.length();
+        final filename = imageFile.path.split(Platform.pathSeparator).last;
+        final mediaType = _resolveImageMediaType(imageFile.path);
+
+        debugPrint('[ApiService] Attaching complaint image: $filename ($length bytes, $mediaType)');
+
         final multipartFile = http.MultipartFile(
           'image',
           stream,
           length,
-          filename: imageFile.path.split(Platform.pathSeparator).last,
+          filename: filename,
+          contentType: mediaType,
         );
         request.files.add(multipartFile);
       }
@@ -669,11 +690,15 @@ class ApiService {
       if (imageFile != null && await imageFile.exists()) {
         final stream = http.ByteStream(imageFile.openRead());
         final length = await imageFile.length();
+        final filename = imageFile.path.split(Platform.pathSeparator).last;
+        final mediaType = _resolveImageMediaType(imageFile.path);
+
         final multipartFile = http.MultipartFile(
           'image',
           stream,
           length,
-          filename: imageFile.path.split(Platform.pathSeparator).last,
+          filename: filename,
+          contentType: mediaType,
         );
         request.files.add(multipartFile);
       }

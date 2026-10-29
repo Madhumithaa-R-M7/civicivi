@@ -56,7 +56,17 @@ const upload = multer({
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
   fileFilter: (req, file, cb) => {
     const allowedMime = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
-    if (allowedMime.includes(file.mimetype.toLowerCase())) {
+    const allowedExts = ['.jpg', '.jpeg', '.png', '.webp'];
+    const ext = path.extname(file.originalname || '').toLowerCase();
+    const mime = (file.mimetype || '').toLowerCase();
+
+    if (allowedMime.includes(mime)) {
+      cb(null, true);
+    } else if (allowedExts.includes(ext) && (mime === 'application/octet-stream' || !mime)) {
+      // Normalize MIME type based on verified image extension
+      if (ext === '.png') file.mimetype = 'image/png';
+      else if (ext === '.webp') file.mimetype = 'image/webp';
+      else file.mimetype = 'image/jpeg';
       cb(null, true);
     } else {
       cb(new Error('Only image files (JPEG, PNG, WEBP) are allowed.'), false);
