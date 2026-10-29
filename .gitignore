@@ -1,0 +1,40 @@
+# Node.js & Backend
+node_modules/
+civicconnect-backend/node_modules/
+civicconnect-backend/.env
+civicconnect-backend/uploads/*
+!civicconnect-backend/uploads/.gitkeep
+
+# Flutter & Dart
+.dart_tool/
+.pub-cache/
+.pub/
+mobile-application/.dart_tool/
+mobile-application/.flutter-plugins
+mobile-application/.flutter-plugins-dependencies
+mobile-application/.pub-cache/
+mobile-application/.pub/
+mobile-application/build/
+build/
+
+# Android & Gradle
+android/app/build/
+android/.gradle/
+.gradle/
+*.apk
+*.aab
+*.class
+*.dex
+
+# Environment & Sensitive Files
+.env
+*.pem
+*.key
+
+# IDEs & System Files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.iml
+.git_bak/
