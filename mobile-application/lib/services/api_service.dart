@@ -11,27 +11,54 @@ class ApiService {
     aOptions: AndroidOptions(encryptedSharedPreferences: true),
   );
 
-  // Configurable base URL:
-  // - Android Emulator: http://10.0.2.2:5000
-  // - iOS / macOS / Windows / Web: http://localhost:5000
-  // - Physical Device: Set using ApiService.setCustomBaseUrl('http://<YOUR_PC_IP>:5000')
+  // Preset backend server URLs
+  static const String renderUrl = 'https://civicivi.onrender.com';
+  static const String usbUrl = 'http://127.0.0.1:5000';
+  static const String lanUrl = 'http://192.168.1.7:5000';
+  static const String emulatorUrl = 'http://10.0.2.2:5000';
+
+  static const String _keyBaseUrl = 'server_base_url';
   static String? _customBaseUrl;
+
+  /// Load persisted custom base URL from SharedPreferences
+  static Future<void> init() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final saved = prefs.getString(_keyBaseUrl);
+      if (saved != null && saved.isNotEmpty) {
+        _customBaseUrl = saved;
+      }
+    } catch (_) {}
+  }
 
   static String get baseUrl {
     if (_customBaseUrl != null && _customBaseUrl!.isNotEmpty) {
       return _customBaseUrl!;
     }
-    if (kIsWeb) return 'http://localhost:5000';
-    try {
-      if (Platform.isAndroid) {
-        return 'http://10.0.2.2:5000';
-      }
-    } catch (_) {}
-    return 'http://localhost:5000';
+    // Default to USB reverse tunnel (127.0.0.1:5000) for connected physical device,
+    // which works instantly over 'adb reverse tcp:5000 tcp:5000'
+    return usbUrl;
   }
 
-  static void setCustomBaseUrl(String url) {
-    _customBaseUrl = url.endsWith('/') ? url.substring(0, url.length - 1) : url;
+  static Future<void> setCustomBaseUrl(String url) async {
+    final cleaned = url.trim().endsWith('/') ? url.trim().substring(0, url.trim().length - 1) : url.trim();
+    _customBaseUrl = cleaned;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_keyBaseUrl, cleaned);
+    } catch (_) {}
+  }
+
+  /// Test connectivity to server /api/health
+  static Future<bool> testConnection([String? targetUrl]) async {
+    try {
+      final target = targetUrl != null && targetUrl.isNotEmpty ? targetUrl : baseUrl;
+      final uri = Uri.parse('$target/api/health');
+      final res = await http.get(uri).timeout(const Duration(seconds: 4));
+      return res.statusCode == 200;
+    } catch (_) {
+      return false;
+    }
   }
 
   // Storage keys

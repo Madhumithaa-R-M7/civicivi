@@ -97,6 +97,19 @@ class _LoginScreenState extends State<LoginScreen> {
             child: _buildCircle(250, const Color(0xFFE3F2FD)),
           ),
           SafeArea(
+            child: Align(
+              alignment: Alignment.topRight,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 8, right: 16),
+                child: IconButton(
+                  icon: const Icon(Icons.cloud_sync_rounded, color: Color(0xFF2962FF), size: 28),
+                  tooltip: 'Backend Server Settings',
+                  onPressed: _showServerConfigSheet,
+                ),
+              ),
+            ),
+          ),
+          SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 28),
               child: Column(
@@ -442,6 +455,192 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  void _showServerConfigSheet() {
+    final controller = TextEditingController(text: ApiService.baseUrl);
+    bool isTesting = false;
+    String? statusMessage;
+    bool? isSuccess;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (sheetContext) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                left: 24,
+                right: 24,
+                top: 24,
+                bottom: MediaQuery.of(sheetContext).viewInsets.bottom + 24,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF2962FF).withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(Icons.dns_rounded, color: Color(0xFF2962FF)),
+                      ),
+                      const SizedBox(width: 12),
+                      const Text(
+                        'Backend Server Settings',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1A237E)),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Select or enter the URL where the CivicConnect backend is hosted:',
+                    style: TextStyle(color: Colors.grey, fontSize: 13),
+                  ),
+                  const SizedBox(height: 16),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      _buildPresetChip('🌐 Render Cloud', ApiService.renderUrl, controller, setSheetState),
+                      _buildPresetChip('🔌 USB Cable (ADB)', ApiService.usbUrl, controller, setSheetState),
+                      _buildPresetChip('📶 Wi-Fi LAN', ApiService.lanUrl, controller, setSheetState),
+                      _buildPresetChip('💻 Emulator', ApiService.emulatorUrl, controller, setSheetState),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: controller,
+                    decoration: InputDecoration(
+                      labelText: 'Server Base URL',
+                      hintText: 'https://your-service.onrender.com',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      prefixIcon: const Icon(Icons.link_rounded),
+                    ),
+                  ),
+                  if (statusMessage != null) ...[
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Icon(
+                          isSuccess == true ? Icons.check_circle_rounded : Icons.error_rounded,
+                          color: isSuccess == true ? Colors.green : Colors.red,
+                          size: 18,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            statusMessage!,
+                            style: TextStyle(
+                              color: isSuccess == true ? Colors.green.shade800 : Colors.red.shade800,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: isTesting
+                              ? null
+                              : () async {
+                                  setSheetState(() {
+                                    isTesting = true;
+                                    statusMessage = 'Connecting...';
+                                    isSuccess = null;
+                                  });
+                                  final ok = await ApiService.testConnection(controller.text.trim());
+                                  setSheetState(() {
+                                    isTesting = false;
+                                    isSuccess = ok;
+                                    statusMessage = ok
+                                        ? 'Connected! Backend is reachable.'
+                                        : 'Connection failed. Check URL or network.';
+                                  });
+                                },
+                          icon: isTesting
+                              ? const SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                )
+                              : const Icon(Icons.wifi_tethering_rounded),
+                          label: const Text('Test Connection'),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () async {
+                            final newUrl = controller.text.trim();
+                            if (newUrl.isNotEmpty) {
+                              await ApiService.setCustomBaseUrl(newUrl);
+                              if (context.mounted) {
+                                Navigator.pop(sheetContext);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Server URL set to: $newUrl'),
+                                    backgroundColor: const Color(0xFF2962FF),
+                                  ),
+                                );
+                              }
+                            }
+                          },
+                          icon: const Icon(Icons.check_rounded),
+                          label: const Text('Apply'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF2962FF),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildPresetChip(
+    String label,
+    String url,
+    TextEditingController controller,
+    StateSetter setSheetState,
+  ) {
+    final isSelected = controller.text == url;
+    return ChoiceChip(
+      label: Text(label, style: const TextStyle(fontSize: 12)),
+      selected: isSelected,
+      onSelected: (_) {
+        setSheetState(() {
+          controller.text = url;
+        });
+      },
     );
   }
 }

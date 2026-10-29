@@ -5,7 +5,10 @@ require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 const poolConfig = process.env.DATABASE_URL
   ? {
       connectionString: process.env.DATABASE_URL,
-      connectionTimeoutMillis: 5000,
+      ssl: process.env.DATABASE_URL.includes('localhost')
+        ? false
+        : { rejectUnauthorized: false },
+      connectionTimeoutMillis: 10000,
     }
   : {
       user: process.env.DB_USER || 'postgres',
