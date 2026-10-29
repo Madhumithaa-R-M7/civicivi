@@ -35,9 +35,8 @@ class ApiService {
     if (_customBaseUrl != null && _customBaseUrl!.isNotEmpty) {
       return _customBaseUrl!;
     }
-    // Default to USB reverse tunnel (127.0.0.1:5000) for connected physical device,
-    // which works instantly over 'adb reverse tcp:5000 tcp:5000'
-    return usbUrl;
+    // Default to the live Render cloud backend
+    return renderUrl;
   }
 
   static Future<void> setCustomBaseUrl(String url) async {
